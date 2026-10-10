@@ -32,7 +32,7 @@ tokio = { version = "1", features = [
 axum-login = "0.18"
 tower-sessions-rusqlite-store = "~0.14.1"
 password-auth = "1"
-askama = "0.14.0"
+askama = "0.16.1"
 axum_csrf = "0.11"
 askama_web = { version = "0.14", features = ["axum-0.8"] }
 tower-sessions = "0.14"
