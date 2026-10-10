@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Loklekha{% endblock %} · Loklekha</title>
+    <link rel="icon" type="image/png" href="/static/images/favicon.png">
+    <link rel="apple-touch-icon" href="/static/images/apple-touch-icon.png">
+    <link rel="stylesheet" href="/static/app.css">
+  </head>
+
+  <body>
+    <header class="header">
+      <div class="header-inner">
+        <a class="brand" href="/">
+        <img class="logo"
+             src="/static/images/logo.jpg"
+             alt=""
+             width="32"
+             height="32">Loklekha</a>
+        <form class="header-search" method="get" action="/issues" role="search">
+          <label class="sr-only" for="header-q">Search issues</label>
+          <input id="header-q"
+                 type="search"
+                 name="q"
+                 placeholder="Search issues"
+                 value="{{ nav.q }}">
+        </form>
+        <nav class="header-nav">
+          <a href="/issues">Issues</a>
+          <a href="/about">About</a>
+        </nav>
+        <div class="header-right">
+          {% if let Some(user) = nav.user %}
+            <a class="btn btn-sm btn-primary" href="/issues/new">New issue</a>
+            <span title="{{ user.role }}">@{{ user.handle }}</span>
+            <form method="post" action="/logout">
+              <input type="hidden" name="authenticity_token" value="{{ nav.csrf }}">
+              <button class="linklike" type="submit">Sign out</button>
+            </form>
+          {% else %}
+            <a href="/login">Sign in</a>
+            <a class="btn btn-sm" href="/signup">Sign up</a>
+          {% endif %}
+        </div>
+      </div>
+    </header>
+    <main class="container {% block width %}{% endblock %}">
+      {% if let Some(flash) = nav.flash %}
+        <div class="flash
+                    {% if flash.error %}flash-error{% endif %}"
+             role="status">{{ flash.message }}</div>
+      {% endif %}
+      {% block content %}{% endblock %}
+    </main>
+    <footer class="footer">
+      Loklekha is an independent public ledger. It is not an official government portal, and public discussion here is not
+      institutional endorsement.
+      · <a href="/about">About &amp; methodology</a>
+    </footer>
+  </body>
+
+</html>

@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Sign up{% endblock %}
+{% block width %}narrow{% endblock %}
+{% block content %}
+  <h1 class="auth-title">Create your account</h1>
+  <div class="box">
+    <div class="box-body">
+      <form method="post" action="/signup">
+        <input type="hidden" name="authenticity_token" value="{{ nav.csrf }}">
+        <label for="handle">Handle</label>
+        <input id="handle"
+               type="text"
+               name="handle"
+               required
+               minlength="2"
+               maxlength="40"
+               pattern="[a-z0-9_]+"
+               autocomplete="username"
+               autocapitalize="none"
+               value="{{ handle }}">
+        <div class="hint">
+          Lowercase letters, digits and underscores. Shown publicly; it does not need to be your real
+          name.
+        </div>
+        <label for="display_name">Display name</label>
+        <input id="display_name"
+               type="text"
+               name="display_name"
+               required
+               maxlength="80"
+               value="{{ display_name }}">
+        <label for="password">Password</label>
+        <input id="password"
+               type="password"
+               name="password"
+               required
+               minlength="{{ min_password }}"
+               autocomplete="new-password">
+        <div class="hint">At least {{ min_password }} characters.</div>
+        <label for="confirm">Confirm password</label>
+        <input id="confirm"
+               type="password"
+               name="confirm"
+               required
+               minlength="{{ min_password }}"
+               autocomplete="new-password">
+        <div class="form-actions">
+          <button class="btn btn-primary btn-block" type="submit">Create account</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <p class="auth-alt">Already have an account? <a href="/login">Sign in</a>.</p>
+{% endblock %}

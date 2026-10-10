@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Sign in{% endblock %}
+{% block width %}narrow{% endblock %}
+{% block content %}
+  <h1 class="auth-title">Sign in to Loklekha</h1>
+  <div class="box">
+    <div class="box-body">
+      <form method="post" action="/login">
+        <input type="hidden" name="authenticity_token" value="{{ nav.csrf }}">
+        <input type="hidden" name="next" value="{{ next }}">
+        <label for="handle">Handle</label>
+        <input id="handle"
+               type="text"
+               name="handle"
+               required
+               autocomplete="username"
+               autocapitalize="none"
+               value="{{ handle }}">
+        <label for="password">Password</label>
+        <input id="password"
+               type="password"
+               name="password"
+               required
+               autocomplete="current-password">
+        <div class="form-actions">
+          <button class="btn btn-primary btn-block" type="submit">Sign in</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <p class="auth-alt">New to Loklekha? <a href="/signup">Create an account</a>.</p>
+{% endblock %}

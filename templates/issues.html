@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}Issues{% endblock %}
+{% block content %}
+  <div class="subnav">
+    <form method="get" action="/issues">
+      <input type="hidden" name="state" value="{{ state }}">
+      <label class="sr-only" for="q">Search</label>
+      <input id="q"
+             type="search"
+             name="q"
+             placeholder="Search all issues"
+             value="{{ nav.q }}">
+      <label class="sr-only" for="category">Category</label>
+      <select id="category" name="category">
+        <option value="">Category</option>
+        {% for c in categories %}<option value="{{ c.value }}"
+        {% if c.selected %}
+          selected{% endif %}>{{ c.label }}</option>
+{% endfor %}
+</select>
+<label class="sr-only" for="status">Status</label>
+<select id="status" name="status">
+  <option value="">Status</option>
+  {% for s in statuses %}<option value="{{ s.value }}" {% if s.selected %} selected{% endif %}>{{ s.label }}</option>
+{% endfor %}
+</select>
+<label class="sr-only" for="locality">Locality</label>
+<input id="locality"
+       type="search"
+       name="locality"
+       placeholder="Locality"
+       value="{{ locality }}">
+<button class="btn" type="submit">Filter</button>
+</form>
+{% if nav.user.is_some() %}<a class="btn btn-primary" href="/issues/new">New issue</a>{% endif %}
+</div>
+
+<div class="box">
+  <div class="box-header states">
+    <a href="{{ open_url }}"
+       class="{% if state == "open" %}selected{% endif %}">{{ open_count }} Open</a>
+    <a href="{{ closed_url }}"
+       class="{% if state == "closed" %}selected{% endif %}">{{ closed_count }} Closed</a>
+  </div>
+  {% for row in rows %}
+    <div class="box-row">
+      {% if row.open %}
+        <svg class="icon icon-open" viewBox="0 0 16 16" aria-label="Open">
+          <circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.5" />
+          <circle cx="8" cy="8" r="1.5" fill="currentColor" />
+        </svg>
+      {% else %}
+        <svg class="icon icon-closed" viewBox="0 0 16 16" aria-label="Closed">
+          <circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.5" />
+          <path d="M5 8.2l2 2 4-4.4" fill="none" stroke="currentColor" stroke-width="1.5" />
+        </svg>
+      {% endif %}
+      <div>
+        <a class="issue-title" href="{{ row.url }}">{{ row.title }}</a>
+        <span class="label">{{ row.category }}</span>
+        {% if let Some(l) = row.locality %}<span class="label label-muted">{{ l }}</span>{% endif %}
+        {% if row.hidden %}<span class="label label-muted">hidden</span>{% endif %}
+        <div class="issue-meta">#{{ row.short_id }} opened on {{ row.opened }} · {{ row.status_label }}</div>
+      </div>
+    </div>
+  {% else %}
+    <div class="blankslate">
+      <h3>No issues match.</h3>
+      {% if nav.user.is_some() %}<p><a href="/issues/new">Report a new issue</a></p>{% else %}<p><a href="/signup">Sign
+        up</a> to report one.</p>{% endif %}
+    </div>
+  {% endfor %}
+</div>
+{% endblock %}

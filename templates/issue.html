@@ -1,0 +1,229 @@
+{% extends "base.html" %}
+{% block title %}{{ title }}{% endblock %}
+{% block content %}
+  <div class="issue-header">
+    <h1>{{ title }} <span class="num">#{{ short_id }}</span></h1>
+    <div>
+      {% if open %}<span class="state state-open">Open</span>{% else %}<span class="state state-closed">Closed</span>{% endif %}
+      <span class="muted"><strong>{{ reporter }}</strong> opened this issue on {{ opened }} · {{ status_label }}</span>
+    </div>
+  </div>
+
+  <div class="layout">
+    <div>
+      <div class="timeline">
+        <div class="card" id="description">
+          <div class="card-header"><strong>{{ reporter }}</strong> reported on {{ opened }}</div>
+          <div class="card-body">{% if let Some(b) = body %}{{ b }}{% else %}<span class="muted">No description
+          provided.</span>{% endif %}</div>
+        {% if !sources.is_empty() %}
+          <div class="card-links">
+            {% for s in sources %}Source: {% if s.web %}<a href="{{ s.url }}" rel="nofollow ugc noopener noreferrer">{{ s.label }}</a>{% else %}{{ s.label }}{% endif %} <span class="muted">({{ s.note }})</span><br>{% endfor %}
+          </div>
+        {% endif %}
+      </div>
+
+      {% for item in items %}
+        {% if item.card %}
+          <div class="card{% if item.nested %}
+                        nested{% endif %}"
+               id="r-{{ item.anchor }}">
+            <div class="card-header">
+              <strong>{{ item.actor }}</strong> {{ item.verb }} <span class="label">{{ item.label }}</span> <span class="small">{{ item.when }}</span>
+            </div>
+            <div class="card-body">{% if item.show_title %}<div class="title">{{ item.title }}</div>{% endif %}{% if let
+            Some(b) = item.body %}{{ b }}{% endif %}</div>
+          {% if !item.links.is_empty() %}
+            <div class="card-links">{% for s in item.links %}Source: {% if s.web %}<a href="{{ s.url }}" rel="nofollow ugc noopener noreferrer">{{ s.label }}</a>{% else %}{{ s.label }}{% endif %} <span class="muted">({{ s.note }})</span><br>{% endfor %}</div>
+          {% endif %}
+        </div>
+      {% else %}
+        <div class="event">
+          <span class="dot" aria-hidden="true"></span>
+          <div>
+            <strong>{{ item.actor }}</strong> {{ item.verb }} <span class="small">{{ item.when }}</span>
+            {% if let Some(r) = item.reason %}<span class="reason">{{ r }}</span>{% endif %}
+          </div>
+        </div>
+      {% endif %}
+    {% endfor %}
+  </div>
+
+  <div class="composer">
+    {% if can_contribute %}
+      <form method="post" action="{{ url }}/comments">
+        <input type="hidden" name="authenticity_token" value="{{ nav.csrf }}">
+        <label for="comment-body">Add a comment</label>
+        <textarea id="comment-body"
+                  name="body"
+                  required
+                  maxlength="50000"
+                  placeholder="Ask a question, add information, or respond"></textarea>
+        <div class="form-actions">
+          <label class="sr-only" for="comment-kind">Kind</label>
+          <select id="comment-kind" name="kind" class="w-auto">
+            {% for k in comment_kinds %}<option value="{{ k.value }}">{{ k.label }}</option>{% endfor %}
+          </select>
+          <button class="btn btn-primary" type="submit">Comment</button>
+        </div>
+      </form>
+
+      <details class="panel">
+        <summary>Add evidence</summary>
+        <div>
+          <form method="post" action="{{ url }}/evidence">
+            <input type="hidden" name="authenticity_token" value="{{ nav.csrf }}">
+            <label for="ev-title">Title</label>
+            <input id="ev-title"
+                   type="text"
+                   name="title"
+                   required
+                   maxlength="300"
+                   placeholder="Photo of the street after dark">
+            <label for="ev-url">Link (optional)</label>
+            <input id="ev-url" type="url" name="url" placeholder="https://">
+            <label for="ev-desc">Description (optional)</label>
+            <textarea id="ev-desc" name="description" maxlength="50000"></textarea>
+            <label for="ev-relation">This evidence</label>
+            <select id="ev-relation" name="relation">
+              <option value="supports">supports the report</option>
+              <option value="contradicts">contradicts the report</option>
+            </select>
+            <label class="checkbox">
+              <input type="checkbox" name="private" value="on">
+              Only moderators may see the
+              link
+            </label>
+            <div class="form-actions">
+              <button class="btn btn-primary" type="submit">Add evidence</button>
+            </div>
+          </form>
+        </div>
+      </details>
+
+      <details class="panel">
+        <summary>Propose a remedy</summary>
+        <div>
+          <form method="post" action="{{ url }}/proposals">
+            <input type="hidden" name="authenticity_token" value="{{ nav.csrf }}">
+            <label for="pr-title">Proposal</label>
+            <input id="pr-title" type="text" name="title" required maxlength="300">
+            <label for="pr-body">Details (optional)</label>
+            <textarea id="pr-body" name="body" maxlength="50000"></textarea>
+            <div class="form-actions">
+              <button class="btn btn-primary" type="submit">Propose</button>
+            </div>
+          </form>
+        </div>
+      </details>
+
+      <details class="panel">
+        <summary>Record what you observed</summary>
+        <div>
+          <form method="post" action="{{ url }}/outcomes">
+            <input type="hidden" name="authenticity_token" value="{{ nav.csrf }}">
+            <label for="oc-title">What did you see?</label>
+            <input id="oc-title"
+                   type="text"
+                   name="title"
+                   required
+                   maxlength="300"
+                   placeholder="The light works after dark">
+            <label for="oc-finding">Finding</label>
+            <select id="oc-finding"
+                    name="finding">{% for f in findings %}<option value="{{ f.value }}">{{ f.label }}</option>
+    {% endfor %}
+  </select>
+  <label for="oc-url">Evidence link (optional)</label>
+  <input id="oc-url" type="url" name="evidence_url" placeholder="https://">
+  <div class="form-actions">
+    <button class="btn btn-primary" type="submit">Record observation</button>
+  </div>
+</form>
+</div>
+</details>
+
+<details class="panel">
+  <summary>Report to moderators</summary>
+  <div>
+    <form method="post" action="{{ url }}/reports">
+      <input type="hidden" name="authenticity_token" value="{{ nav.csrf }}">
+      <label for="rp-category">Reason</label>
+      <select id="rp-category"
+              name="category">{% for c in report_categories %}<option value="{{ c.value }}">{{ c.label }}</option>{% endfor %}</select>
+      <label for="rp-details">Details (optional, only moderators see this)</label>
+      <textarea id="rp-details" name="details" maxlength="2000"></textarea>
+      <div class="form-actions">
+        <button class="btn btn-danger" type="submit">Report</button>
+      </div>
+    </form>
+  </div>
+</details>
+{% else if nav.user.is_some() %}
+<p class="muted">This issue no longer accepts contributions.</p>
+{% else %}
+<div class="box">
+  <div class="box-body">
+    <a href="/login?next={{ url_encoded }}">Sign in</a> or <a href="/signup">sign up</a> to
+    comment, add evidence or propose a remedy.
+  </div>
+</div>
+{% endif %}
+</div>
+</div>
+
+<aside>
+  <div class="sidebar-item">
+    <h3>Status</h3>
+    <div>{{ status_label }}</div>
+    {% if !transitions.is_empty() %}
+      <form method="post" action="{{ url }}/status">
+        <input type="hidden" name="authenticity_token" value="{{ nav.csrf }}">
+        <input type="hidden" name="expected_version" value="{{ version }}">
+        <label class="sr-only" for="st-to">Change status to</label>
+        <select id="st-to"
+                name="to">{% for t in transitions %}<option value="{{ t.value }}">{{ t.label }}</option>{% endfor %}
+        </select>
+        <label class="sr-only" for="st-reason">Reason</label>
+        <input id="st-reason"
+               type="text"
+               name="reason"
+               maxlength="2000"
+               placeholder="Reason (required to close, dispute or reopen)">
+        <button class="btn btn-sm" type="submit">Change status</button>
+      </form>
+    {% endif %}
+    <p class="notice">{{ status_notice }}</p>
+  </div>
+  <div class="sidebar-item">
+    <h3>Responsible body</h3>
+    {% if responsible.is_empty() %}<span class="muted">Unknown</span>{% else %}
+      <ul>{% for r in responsible %}<li>{{ r.name }} <span class="label label-muted">{{ r.certainty }}</span></li>{% endfor %}</ul>{% endif %}
+  </div>
+  <div class="sidebar-item">
+    <h3>Details</h3>
+    <ul>
+      <li>Category: <span class="label">{{ category }}</span></li>
+      {% for d in details %}<li>{{ d.label }}: {{ d.value }}</li>{% endfor %}
+    </ul>
+  </div>
+  {% if !related.is_empty() %}
+    <div class="sidebar-item">
+      <h3>Related issues</h3>
+      <ul>{% for r in related %}<li><a href="{{ r.url }}">{{ r.title }}</a> <span class="muted">{{ r.note }}</span></li>
+  {% endfor %}
+</ul>
+</div>
+{% endif %}
+<div class="sidebar-item">
+  <h3>Participants</h3>
+  <ul>{% for p in participants %}<li>{{ p }}</li>{% endfor %}</ul>
+</div>
+<div class="sidebar-item">
+  <a href="/api/issues/{{ id_encoded }}/export">Export with full history (JSON)</a>
+  <br>
+  <span class="muted">ID: {{ id }}</span>
+</div>
+</aside>
+</div>
+{% endblock %}

@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block title %}New issue{% endblock %}
+{% block width %}medium{% endblock %}
+{% block content %}
+  <h1>Report a public issue</h1>
+  <p class="notice">
+    Do not include personal information, phone numbers or exact home addresses. Describe the problem and
+    an approximate location.
+  </p>
+  <form method="post" action="/issues/new">
+    <input type="hidden" name="authenticity_token" value="{{ nav.csrf }}">
+    <label for="title">Title</label>
+    <input id="title"
+           type="text"
+           name="title"
+           required
+           maxlength="300"
+           value="{{ form.title }}"
+           placeholder="Streetlight out on 4th Cross for two weeks">
+    <label for="description">Description</label>
+    <textarea id="description"
+              name="description"
+              maxlength="50000"
+              placeholder="What is wrong, since when, and who is affected?">{{ form.description }}</textarea>
+    <label for="category">Category</label>
+    <select id="category" name="category" required>
+      {% for c in categories %}<option value="{{ c.value }}"
+        {% if c.selected %}
+          selected{% endif %}>{{ c.label }}</option>
+{% endfor %}
+</select>
+<label for="location_text">Approximate location</label>
+<input id="location_text"
+       type="text"
+       name="location_text"
+       maxlength="200"
+       value="{{ form.location_text }}"
+       placeholder="4th Cross, near the bus stop">
+<label for="locality">Locality</label>
+<input id="locality"
+       type="text"
+       name="locality"
+       maxlength="100"
+       value="{{ form.locality }}"
+       placeholder="Ward, village or neighbourhood">
+<label for="affected_service">Affected service</label>
+<input id="affected_service"
+       type="text"
+       name="affected_service"
+       maxlength="200"
+       value="{{ form.affected_service }}"
+       placeholder="Street lighting">
+<label for="institution">Responsible body (if you know it)</label>
+<select id="institution" name="institution">
+  <option value="">I don't know</option>
+  {% for i in institutions %}<option value="{{ i.value }}"
+        {% if i.selected %}
+          selected{% endif %}>{{ i.label }}</option>
+{% endfor %}
+</select>
+<div class="hint">Your choice is recorded as a suggestion until the body confirms it.</div>
+<label for="source_url">Link to a photo or document (optional)</label>
+<input id="source_url"
+       type="url"
+       name="source_url"
+       value="{{ form.source_url }}"
+       placeholder="https://">
+<label class="checkbox"><input type="checkbox"
+       name="source_private"
+       value="on"
+       {% if form.source_private %}
+         checked{% endif %}> Only moderators may see this link</label>
+<label class="checkbox"><input type="checkbox"
+       name="withhold_identity"
+       value="on"
+       {% if form.withhold_identity %}
+         checked{% endif %}> Hide my name from the public (moderators can still see it)</label>
+<div class="form-actions">
+  <a class="btn" href="/issues">Cancel</a>
+  <button class="btn btn-primary" type="submit">Submit new issue</button>
+</div>
+</form>
+{% endblock %}
