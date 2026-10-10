@@ -6,6 +6,7 @@
 //! search, the HTTP API and pages. Records, history, provenance, relations,
 //! validation, storage and export come from `pardarsh-core`.
 
+pub mod api;
 pub mod config;
 pub mod error;
 pub mod identity;
