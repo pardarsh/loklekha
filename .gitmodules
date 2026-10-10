@@ -1,0 +1,3 @@
+[submodule "pardarsh-core"]
+	path = pardarsh-core
+	url = https://github.com/pardarsh/pardarsh-core
