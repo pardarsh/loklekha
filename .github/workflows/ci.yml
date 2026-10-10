@@ -86,7 +86,11 @@ jobs:
       - name: Check the pinned commit exists upstream
         run: |
           pinned=$(git -C pardarsh-core rev-parse HEAD)
-          git -C pardarsh-core fetch --quiet origin
+          # actions/checkout clones submodules shallow and without a branch
+          # refspec, so fetch every upstream branch (and its history) first.
+          unshallow=
+          if [ "$(git -C pardarsh-core rev-parse --is-shallow-repository)" = true ]; then unshallow=--unshallow; fi
+          git -C pardarsh-core fetch --quiet $unshallow origin '+refs/heads/*:refs/remotes/origin/*'
           git -C pardarsh-core branch -r --contains "$pinned" | grep -q . \
             || { echo "pardarsh-core is pinned to $pinned, which is not on any upstream branch"; exit 1; }
           echo "pardarsh-core pinned to $pinned"
