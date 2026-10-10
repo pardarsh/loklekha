@@ -24,7 +24,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # cargo needs the path dependency to resolve the package, even for fmt.
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
         with:
           submodules: true
       # rustup reads rust-toolchain.toml (channel and components) on first use.
@@ -36,7 +36,7 @@ jobs:
     name: clippy
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
         with:
           submodules: true
       - uses: Swatinem/rust-cache@v2
@@ -50,7 +50,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
         with:
           submodules: true
       - uses: Swatinem/rust-cache@v2
@@ -68,7 +68,7 @@ jobs:
       # Overrides rust-toolchain.toml; must match `rust-version` in Cargo.toml.
       RUSTUP_TOOLCHAIN: 1.88.0
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
         with:
           submodules: true
       - run: rustup toolchain install 1.88.0 --profile minimal
@@ -79,7 +79,7 @@ jobs:
     name: pardarsh-core submodule
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
         with:
           submodules: true
       # Fails if the pinned commit is not reachable from the published core repository.
@@ -101,7 +101,7 @@ jobs:
     env:
       RUSTDOCFLAGS: -D warnings
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
         with:
           submodules: true
       - uses: Swatinem/rust-cache@v2
@@ -111,7 +111,7 @@ jobs:
     name: cargo-deny
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
         with:
           submodules: true
       - uses: EmbarkStudios/cargo-deny-action@v2
@@ -123,7 +123,7 @@ jobs:
     name: pre-commit (file hygiene, templates)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
