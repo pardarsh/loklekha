@@ -1,0 +1,59 @@
+name: Bug report
+description: Report a reproducible problem in Loklekha.
+title: "bug: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a problem. Do not paste API tokens, personal data, or real
+        issue reports that identify people. Security vulnerabilities belong in a private
+        report (see SECURITY.md), not here.
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What went wrong?
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Issue reporting / editing
+        - Evidence, comments, proposals
+        - Workflow / status transitions
+        - Institutions, decisions, actions, outcomes
+        - Moderation / privacy
+        - Search / duplicates
+        - Export
+        - HTTP API
+        - HTML pages
+        - Accounts / configuration
+        - Documentation
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction
+      description: Steps, API requests (with tokens removed) or a failing test.
+      render: shell
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Loklekha commit, pardarsh-core submodule commit (`git submodule status`), `rustc --version`, OS.
+      render: text
+    validations:
+      required: true

@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Security issue
+    url: https://github.com/pardarsh/loklekha/security/policy
+    about: Please report security vulnerabilities according to SECURITY.md instead of opening a public issue.
+  - name: Problem in the shared record model (pardarsh-core)
+    url: https://github.com/pardarsh/pardarsh-core/issues/new/choose
+    about: Identifiers, record envelope, history, relations, validation, storage or export bugs belong in pardarsh-core.

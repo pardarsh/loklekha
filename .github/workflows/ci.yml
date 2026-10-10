@@ -1,0 +1,130 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: 0
+  RUSTFLAGS: -D warnings
+
+jobs:
+  fmt:
+    name: rustfmt
+    runs-on: ubuntu-latest
+    steps:
+      # cargo needs the path dependency to resolve the package, even for fmt.
+      - uses: actions/checkout@v5
+        with:
+          submodules: true
+      # rustup reads rust-toolchain.toml (channel and components) on first use.
+      - run: rustup show active-toolchain
+      # Formats Loklekha only; the submodule is not a workspace member.
+      - run: cargo fmt --all -- --check
+
+  clippy:
+    name: clippy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          submodules: true
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo clippy --all-targets --all-features -- -D warnings
+
+  test:
+    name: test (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          submodules: true
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo test --all-features
+      - name: Smoke-test the CLI
+        shell: bash
+        run: |
+          cargo run --quiet -- demo-config --out "$RUNNER_TEMP/loklekha.json"
+          cargo run --quiet -- hash-token example-token
+
+  msrv:
+    name: MSRV (1.88)
+    runs-on: ubuntu-latest
+    env:
+      # Overrides rust-toolchain.toml; must match `rust-version` in Cargo.toml.
+      RUSTUP_TOOLCHAIN: 1.88.0
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          submodules: true
+      - run: rustup toolchain install 1.88.0 --profile minimal
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo test --all-features
+
+  submodule:
+    name: pardarsh-core submodule
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          submodules: true
+      # Fails if the pinned commit is not reachable from the published core repository.
+      - name: Check the pinned commit exists upstream
+        run: |
+          pinned=$(git -C pardarsh-core rev-parse HEAD)
+          git -C pardarsh-core fetch --quiet origin
+          git -C pardarsh-core branch -r --contains "$pinned" | grep -q . \
+            || { echo "pardarsh-core is pinned to $pinned, which is not on any upstream branch"; exit 1; }
+          echo "pardarsh-core pinned to $pinned"
+
+  docs:
+    name: docs
+    runs-on: ubuntu-latest
+    env:
+      RUSTDOCFLAGS: -D warnings
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          submodules: true
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo doc --no-deps --all-features
+
+  deny:
+    name: cargo-deny
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          submodules: true
+      - uses: EmbarkStudios/cargo-deny-action@v2
+        with:
+          command: check
+          arguments: --all-features
+
+  pre-commit:
+    name: pre-commit (file hygiene, templates)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pre-commit
+      # Runs file checks and the djLint template formatter/linter; cargo hooks run in the jobs above.
+      - run: pre-commit run --all-files --show-diff-on-failure
+        env:
+          SKIP: cargo-fmt,cargo-clippy,cargo-test,cargo-deny

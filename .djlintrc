@@ -1,0 +1,8 @@
+{
+  "profile": "jinja",
+  "indent": 2,
+  "max_line_length": 120,
+  "max_blank_lines": 1,
+  "format_attribute_template_tags": true,
+  "ignore": "H006,H021,H030,H031,J004,J018"
+}
