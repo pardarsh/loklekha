@@ -7,9 +7,11 @@
 //! validation, storage and export come from `pardarsh-core`.
 
 pub mod api;
+pub mod auth;
 pub mod config;
 pub mod error;
 pub mod identity;
 pub mod service;
+pub mod users;
 pub mod vocab;
 pub mod workflow;
